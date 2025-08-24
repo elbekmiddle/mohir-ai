@@ -4,9 +4,6 @@ import PartnersApi from "../pages/mockDatas/partnersapi/static.json";
 import { useRouter } from "next/router";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import PhoneInput from "react-phone-input-2";
-// import dotenv from 'dotenv';
-// Load the environment variables from the .env file
-// dotenv.config();
 
 export default function ModalPartners({ setOpenPartnersModal }) {
 
@@ -21,58 +18,53 @@ export default function ModalPartners({ setOpenPartnersModal }) {
 
   const buttonStyle = () => {
     if (name !== '' && comment !== '') {
-      setBtnStyle(true)
+      setBtnStyle(true);
     } else {
-      setBtnStyle(false)
+      setBtnStyle(false);
     }
-  }
+  };
 
-  const token = "8036896960:AAFyZU4HVrUwkJFPT--zND1qKidtwSmiwlo";
-  const chad_id = 8226799639;
+  // ✅ Env’dan token va chat_id olish
+  const token = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+  const chat_id = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
 
   const handleHCaptchaVerify = (responseToken) => {
     setHCaptchaResponse(responseToken);
-  }
+  };
 
   const isHCaptchaChecked = () => {
     return hCaptchaResponse !== '';
-  }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (name !== "" && number !== '' && comment !== "" && isHCaptchaChecked()) {
 
-      fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
-        async: true,
-        crossDomain: true,
+      fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "cache-control": "no-cache",
         },
         body: JSON.stringify({
-          chat_id: chad_id,
+          chat_id: chat_id,
           parse_mode: 'html',
           text:
-            "Ism: " +
-            name +
-            "\nTelefon raqam: +" +
-            number +
-            "\nIzoh: " +
-            comment,
+            "Ism: " + name +
+            "\nTelefon raqam: +" + number +
+            "\nIzoh: " + comment,
         }),
-      }).then(function (response) {
-        console.log(response);
-      }).catch(err => console.log(err));
+      })
+        .then((response) => console.log(response))
+        .catch(err => console.log(err));
 
       setName("");
-      setComment("")
+      setComment("");
       setNumber("");
-      setBtnStyle(false)
-      setIsSend(true)
+      setBtnStyle(false);
+      setIsSend(true);
       setTimeout(() => {
-        setOpenPartnersModal(false)
+        setOpenPartnersModal(false);
       }, 4000);
     }
 
@@ -97,7 +89,12 @@ export default function ModalPartners({ setOpenPartnersModal }) {
                 isSend ? <span className={styles.thanksMessage}>{value.thanks}</span> :
                   <form onSubmit={handleSubmit} className={styles.body}>
                     <label htmlFor="name">{value.label_name}</label>
-                    <input onChange={(e) => setName(e.target.value)} type={'text'} id="name" placeholder={value.placeholder_name} />
+                    <input
+                      onChange={(e) => setName(e.target.value)}
+                      type="text"
+                      id="name"
+                      placeholder={value.placeholder_name}
+                    />
 
                     <label htmlFor="number">{value.label_phone}</label>
                     <PhoneInput
@@ -130,13 +127,18 @@ export default function ModalPartners({ setOpenPartnersModal }) {
 
                     <div className={styles.captcha}>
                       <HCaptcha
-                        sitekey={`9a098deb-3095-4202-97c0-347d8a1b43e2`}
+                        sitekey="9a098deb-3095-4202-97c0-347d8a1b43e2"
                         onVerify={handleHCaptchaVerify}
                       />
-                      {isHCaptchaChecked() ? (<></>) : (<p>Captcha tekshirilmadi!</p>)}
+                      {isHCaptchaChecked() ? null : <p>Captcha tekshirilmadi!</p>}
                     </div>
 
-                    <button className={btnStyle ? styles.activeBtn : ''} type="submit">{value.button}</button>
+                    <button
+                      className={btnStyle ? styles.activeBtn : ''}
+                      type="submit"
+                    >
+                      {value.button}
+                    </button>
                   </form>
               }
             </div>
